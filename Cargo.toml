@@ -10,3 +10,5 @@ image = "0.25.6"
 opensimplex_noise_rs = "0.3.0"
 
 spatial2d = { git = "https://github.com/Liam19/Spatial2D" }
+
+rng = { git = "https://github.com/Liam19/rng.git" }

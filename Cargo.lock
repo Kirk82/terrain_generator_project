@@ -835,7 +835,7 @@ checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
 [[package]]
 name = "rng"
 version = "0.1.0"
-source = "git+https://github.com/Liam19/Rng.git#d157e3e2d54f19898d746af446b78ecb3873a275"
+source = "git+https://github.com/Liam19/rng.git#d157e3e2d54f19898d746af446b78ecb3873a275"
 dependencies = [
  "getrandom 0.3.3",
  "rng_derive",
@@ -844,7 +844,7 @@ dependencies = [
 [[package]]
 name = "rng_derive"
 version = "0.1.0"
-source = "git+https://github.com/Liam19/Rng.git#d157e3e2d54f19898d746af446b78ecb3873a275"
+source = "git+https://github.com/Liam19/rng.git#d157e3e2d54f19898d746af446b78ecb3873a275"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -970,6 +970,7 @@ version = "0.1.0"
 dependencies = [
  "image",
  "opensimplex_noise_rs",
+ "rng",
  "spatial2d",
 ]
 
