@@ -1,4 +1,4 @@
-use image::{flat::SampleLayout, *};
+use image::*;
 use opensimplex_noise_rs::*;
 use spatial2d::*;
 
@@ -7,9 +7,9 @@ fn main() {
 
     let noise_generator = OpenSimplexNoise::new(None);
 
-    for (my_value, my_position) in terrain_map.iter_with_pos_mut() {
-        let noise_value = noise_generator.eval_2d(my_position.x.into(), my_position.y.into());
-        *my_value = noise_value as f32;
+    for (value, position) in terrain_map.iter_with_pos_mut() {
+        let noise_value = noise_generator.eval_2d(position.x.into(), position.y.into());
+        *value = noise_value as f32;
     }
 
     fn get_colour() -> Rgb<f32> {
@@ -19,9 +19,15 @@ fn main() {
         } else {
             if height <= 0.3 {
                 Rgb([1.0, 1.0, 0.0])
+            } else {
+                if height <= 0.4 {
+                    Rgb([1.0, 1.0, 1.0])
+                } else {
+                    None
+                }
             }
         }
-    }
+    };
 
     println!("Hello World");
 }
