@@ -22,11 +22,13 @@ fn main() {
         image_buffer.put_pixel(position.x, position.y, pixel);
     }
 
-    let path = Path::new("./images/terrain.png");
+    let path = Path::new("terrain.png");
 
-    image_buffer.save(path).unwrap();
+    let image = DynamicImage::ImageRgb32F(image_buffer);
 
-    DynamicImage::ImageRgb32F(image_buffer);
+    image
+        .save(path)
+        .unwrap_or_else(|e| panic!("Failed to save image at {path:#?}: {e}"));
 }
 
 fn get_colour(height: f32) -> Rgb<f32> {
