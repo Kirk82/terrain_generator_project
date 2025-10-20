@@ -1,3 +1,5 @@
+use std::path::{self, Path};
+
 use image::*;
 use opensimplex_noise_rs::*;
 use spatial2d::*;
@@ -5,7 +7,7 @@ use spatial2d::*;
 fn main() {
     let mut terrain_map: Matrix<f32> = Matrix::new(UVec2 { x: 1000, y: 1000 });
 
-    terrian_map.save("test_terrain.png").unwrap();
+    let mut image_buffer = Rgb32FImage::new(1000, 1000);
 
     let noise_generator = OpenSimplexNoise::new(None);
 
@@ -16,9 +18,15 @@ fn main() {
 
     for (height, position) in terrain_map.iter_with_pos() {
         let pixel = get_colour(*height);
-        let mut image_buffer = Rgb32FImage::new(position.x, position.y);
+
         image_buffer.put_pixel(position.x, position.y, pixel);
     }
+
+    let path = Path::new("./images/terrain.png");
+
+    image_buffer.save(path).unwrap();
+
+    DynamicImage::ImageRgb32F(image_buffer);
 }
 
 fn get_colour(height: f32) -> Rgb<f32> {
