@@ -33,8 +33,8 @@ fn main() {
     for (value, position) in terrain_map.iter_with_pos_mut() {
         let noise_value: f64 =
             noise_generator.eval_2d((position.x as f64) / 40.0, (position.y as f64) / 40.0);
-        let gradient = 500 - position;
-        *value = noise_value * gradient;
+        let matrix_centre: UVec2 = ((x_size / 2).into(), (y_size / 2)).into();
+        *value = noise_value as f32;
     }
 
     //looping through the matrix again and assigning different colours to different values of the noise map and then assigning each pixel to the image buffer
