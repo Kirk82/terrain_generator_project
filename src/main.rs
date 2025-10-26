@@ -33,7 +33,7 @@ fn main() {
     for (value, position) in terrain_map.iter_with_pos_mut() {
         let noise_value: f64 =
             noise_generator.eval_2d((position.x as f64) / 40.0, (position.y as f64) / 40.0);
-        let matrix_centre: UVec2 = ((x_size / 2).into(), (y_size / 2)).into();
+        let matrix_centre: UVec2 = ((x_size / 2), (y_size / 2)).into();
         *value = noise_value as f32;
     }
 
