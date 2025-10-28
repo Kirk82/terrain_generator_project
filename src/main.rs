@@ -29,11 +29,18 @@ fn main() {
     //creating a random noise generator variable to be used in the loop
     let noise_generator = OpenSimplexNoise::new(Some(random_seed));
 
+    let matrix_centre: UVec2 = (UVec2 {
+        x: (x_size),
+        y: (y_size),
+    }) / 2;
+
+    let max_distance = 500.0_f32.sqrt();
+
     //looping through the matrix and assigning noise values to each value in the matrix
     for (value, position) in terrain_map.iter_with_pos_mut() {
         let noise_value: f64 =
             noise_generator.eval_2d((position.x as f64) / 40.0, (position.y as f64) / 40.0);
-        let matrix_centre: UVec2 = ((x_size / 2), (y_size / 2)).into();
+
         *value = noise_value as f32;
     }
 
