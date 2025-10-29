@@ -45,9 +45,9 @@ fn main() {
 
         let normalised_distance = distance / max_distance;
 
-        let inverted_distance = (normalised_distance + 1.0) / 2.0;
+        let inverted_distance = 1.0 - normalised_distance;
 
-        *value = (noise_value as f32) * inverted_distance;
+        *value = (((noise_value as f32) + 1.0) / 2.0) * inverted_distance;
     }
 
     //looping through the matrix again and assigning different colours to different values of the noise map and then assigning each pixel to the image buffer
@@ -85,10 +85,10 @@ fn get_colour(height: f32) -> Rgb<u8> {
                 if height <= 0.8 {
                     Rgb([150, 75, 0])
                 } else {
-                    if height <= 0.9 {
+                    if height <= 1.0 {
                         Rgb([255, 255, 255])
                     } else {
-                        if height >= 0.9 {}
+                        if height >= 1.1 {}
                         panic!()
                     }
                 }
