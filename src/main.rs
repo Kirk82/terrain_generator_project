@@ -7,7 +7,7 @@ use spatial2d::*;
 
 fn main() {
     //setting the size of the y and x axis
-    let x_size = 1000;
+    let x_size: u32 = 1000;
 
     let y_size = 1000;
 
@@ -34,14 +34,20 @@ fn main() {
         y: (y_size),
     }) / 2;
 
-    let max_distance = 500.0_f32.sqrt();
+    let max_distance = 500.0 * (2.0_f32.sqrt());
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (value, position) in terrain_map.iter_with_pos_mut() {
         let noise_value: f64 =
             noise_generator.eval_2d((position.x as f64) / 40.0, (position.y as f64) / 40.0);
 
-        *value = noise_value as f32;
+        let distance = matrix_centre.distance_euclidian(position);
+
+        let normalised_distance = distance / max_distance;
+
+        let inverted_distance = (normalised_distance + 1.0) / 2.0;
+
+        *value = (noise_value as f32) * inverted_distance;
     }
 
     //looping through the matrix again and assigning different colours to different values of the noise map and then assigning each pixel to the image buffer
@@ -59,10 +65,15 @@ fn main() {
     image
         .save(path)
         .unwrap_or_else(|e| panic!("Failed to save image at {path:#?}: {e}"));
+
+    println!(
+        "max distance {} \n centre point {}",
+        max_distance, matrix_centre
+    );
 }
 
 fn get_colour(height: f32) -> Rgb<u8> {
-    if height <= 0.000001 {
+    if height <= 0.1 {
         Rgb([0, 0, 255])
     } else {
         if height <= 0.5 {
