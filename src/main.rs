@@ -32,16 +32,16 @@ fn main() {
         y: (y_size),
     }) / 2;
 
-    let max_distance = 500.0;
+    let max_distance = 500.00;
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (value, position) in terrain_map.iter_with_pos_mut() {
         let noise_value: f64 =
-            noise_generator.eval_2d((position.x as f64) / 40.0, (position.y as f64) / 40.0);
+            noise_generator.eval_2d((position.x as f64) / 60.0, (position.y as f64) / 60.0);
 
         let distance = matrix_centre.distance_euclidian(position);
 
-        let normalised_distance = distance / max_distance;
+        let normalised_distance = (distance / max_distance).min(1.0);
 
         let inverted_distance = 1.0 - normalised_distance;
 
@@ -49,9 +49,7 @@ fn main() {
 
         let square_root = value.sqrt();
 
-        let changed_value = *value * square_root;
-
-        lerp(*value, changed_value, normalised_distance);
+        *value = lerp(*value, square_root, inverted_distance);
     }
 
     //looping through the matrix again and assigning different colours to different values of the noise map and then assigning each pixel to the image buffer
@@ -81,19 +79,23 @@ fn get_colour(height: f32) -> Rgb<u8> {
         Rgb([0, 0, 255])
     } else {
         if height <= 0.2 {
-            Rgb([255, 255, 0])
+            Rgb([190, 190, 0])
         } else {
-            if height <= 0.5 {
-                Rgb([0, 255, 0])
+            if height <= 0.4 {
+                Rgb([230, 230, 0])
             } else {
-                if height <= 0.8 {
-                    Rgb([150, 75, 0])
+                if height <= 0.5 {
+                    Rgb([0, 160, 0])
                 } else {
-                    if height <= 1.0 {
-                        Rgb([255, 255, 255])
+                    if height <= 0.8 {
+                        Rgb([150, 75, 0])
                     } else {
-                        if height >= 1.1 {}
-                        panic!()
+                        if height <= 1.0 {
+                            Rgb([255, 255, 255])
+                        } else {
+                            if height >= 1.0 {}
+                            panic!()
+                        }
                     }
                 }
             }
