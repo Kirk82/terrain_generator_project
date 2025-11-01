@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use image::*;
 use opensimplex_noise_rs::*;
 use rng::*;
@@ -34,7 +32,7 @@ fn main() {
         y: (y_size),
     }) / 2;
 
-    let max_distance = 500.0 * (2.0_f32.sqrt());
+    let max_distance = 500.0;
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (value, position) in terrain_map.iter_with_pos_mut() {
@@ -48,6 +46,12 @@ fn main() {
         let inverted_distance = 1.0 - normalised_distance;
 
         *value = (((noise_value as f32) + 1.0) / 2.0) * inverted_distance;
+
+        let square_root = value.sqrt();
+
+        let changed_value = *value * square_root;
+
+        lerp(*value, changed_value, normalised_distance);
     }
 
     //looping through the matrix again and assigning different colours to different values of the noise map and then assigning each pixel to the image buffer
@@ -58,7 +62,7 @@ fn main() {
     }
 
     //defining the path the image will be saved to
-    let path = Path::new("terrain.png");
+    let path = "terrain.png";
 
     let image = DynamicImage::ImageRgb8(image_buffer);
 
@@ -76,10 +80,10 @@ fn get_colour(height: f32) -> Rgb<u8> {
     if height <= 0.1 {
         Rgb([0, 0, 255])
     } else {
-        if height <= 0.5 {
+        if height <= 0.2 {
             Rgb([255, 255, 0])
         } else {
-            if height <= 0.7 {
+            if height <= 0.5 {
                 Rgb([0, 255, 0])
             } else {
                 if height <= 0.8 {
@@ -95,4 +99,8 @@ fn get_colour(height: f32) -> Rgb<u8> {
             }
         }
     }
+}
+
+fn lerp(from: f32, to: f32, s: f32) -> f32 {
+    from + (to - from) * s
 }
