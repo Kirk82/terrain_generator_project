@@ -36,8 +36,16 @@ fn main() {
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (value, position) in terrain_map.iter_with_pos_mut() {
-        let noise_value: f64 =
-            noise_generator.eval_2d((position.x as f64) / 60.0, (position.y as f64) / 60.0);
+        let first_noise_value: f64 =
+            noise_generator.eval_2d((position.x as f64) / 10.0, (position.y as f64) / 10.0);
+
+        let second_noise_value =
+            noise_generator.eval_2d((position.x as f64) / 50.0, (position.y as f64) / 50.0);
+
+        let third_noise_value =
+            noise_generator.eval_2d((position.x as f64) / 80.0, (position.y as f64) / 80.0);
+
+        let noise_value = first_noise_value * second_noise_value * third_noise_value;
 
         let distance = matrix_centre.distance_euclidian(position);
 
