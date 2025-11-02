@@ -5,18 +5,20 @@ use spatial2d::*;
 
 fn main() {
     //setting the size of the y and x axis
-    let x_size: u32 = 1000;
+    let size = UVec2::new(1000, 1000);
 
-    let y_size = 1000;
+    let rng = Rng::new();
+
+    let extra_distance = rng.gen_bool(0.5);
 
     //creating a matrix based on x and y variable sizes
     let mut terrain_map: Matrix<f32> = Matrix::new(UVec2 {
-        x: x_size,
-        y: y_size,
+        x: size.x,
+        y: size.y,
     });
 
     //creating a an image buffer based on the x and y variable sizes
-    let mut image_buffer = RgbImage::new(x_size, y_size);
+    let mut image_buffer = RgbImage::new(size.x, size.y);
 
     //creating a variable for the Rng crate
     let rng_generator = Rng::new();
@@ -28,11 +30,21 @@ fn main() {
     let noise_generator = OpenSimplexNoise::new(Some(random_seed));
 
     let matrix_centre: UVec2 = (UVec2 {
-        x: (x_size),
-        y: (y_size),
+        x: (size.x),
+        y: (size.y),
     }) / 2;
 
-    let max_distance = 500.00;
+    let max_distance_x = size.x / 2;
+
+    let max_distance_y = size.y / 2;
+
+    if extra_distance == true {
+        max_distance_x * 2;
+    } else if extra_distance == false {
+        max_distance_y * 2;
+    }
+
+    let max_distance = UVec2::new(max_distance_x, max_distance_y);
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (value, position) in terrain_map.iter_with_pos_mut() {
@@ -40,20 +52,30 @@ fn main() {
             noise_generator.eval_2d((position.x as f64) / 10.0, (position.y as f64) / 10.0);
 
         let second_noise_value =
-            noise_generator.eval_2d((position.x as f64) / 50.0, (position.y as f64) / 50.0);
+            noise_generator.eval_2d((position.x as f64) / 30.0, (position.y as f64) / 30.0);
 
         let third_noise_value =
-            noise_generator.eval_2d((position.x as f64) / 80.0, (position.y as f64) / 80.0);
-
-        let noise_value = first_noise_value * second_noise_value * third_noise_value;
+            noise_generator.eval_2d((position.x as f64) / 10.0, (position.y as f64) / 10.0);
 
         let distance = matrix_centre.distance_euclidian(position);
 
-        let normalised_distance = (distance / max_distance).min(1.0);
+        let normalised_x_distance = (distance / max_distance_x as f32).min(1.0);
 
-        let inverted_distance = 1.0 - normalised_distance;
+        let normalised_y_distance = (distance / max_distance_y as f32).min(1.0);
 
-        *value = (((noise_value as f32) + 1.0) / 2.0) * inverted_distance;
+        let inverted_distance;
+
+        if extra_distance == true {
+            let inverted_distance = 1.0 - normalised_x_distance;
+        } else if extra_distance == false {
+            let inverter_distance = 1.0 - normalised_y_distance;
+        }
+
+        let first_value = (((first_noise_value as f32) + 1.0) / 2.0) * inverted_distance;
+        let second_value = (((second_noise_value as f32) + 1.0) / 2.0) * inverted_distance;
+        let third_value = (((third_noise_value as f32) + 1.0) / 2.0) * inverted_distance;
+
+        *value = first_value * second_value * third_value;
 
         let square_root = value.sqrt();
 
