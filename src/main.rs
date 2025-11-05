@@ -4,10 +4,16 @@ use rng::*;
 use spatial2d::*;
 
 fn main() {
-    let size = 1000;
+    // let size = 1000;
+    let scale: f32 = 160.0;
+    let layer_count: u32 = 8;
+    let x_distance = 1000;
+    let y_distance = 1000;
+
+    let grid_size = UVec2::new(x_distance, y_distance);
 
     //setting the size of the y and x axis
-    let grid_size = UVec2::splat(size);
+    // let grid_size = UVec2::splat(size);
 
     //creating a matrix based on x and y variable sizes
     let mut terrain_map: Matrix<f32> = Matrix::new(grid_size);
@@ -16,31 +22,39 @@ fn main() {
     let mut image_buffer = RgbImage::new(grid_size.x, grid_size.y);
 
     //creating a variable for the Rng crate
-    let rng_generator = Rng::new();
+    let rng = Rng::new();
 
     //creating a variable to generate a random for the noise generator
-    let random_seed: i64 = rng_generator.gen_value();
+    let random_seed: i64 = rng.gen_value();
 
     //creating a random noise generator variable to be used in the loop
     let noise_generator = OpenSimplexNoise::new(Some(random_seed));
 
     let matrix_centre: UVec2 = grid_size / 2;
 
-    let max_distance = size as f32 / 2.0;
+    //let max_distance = size as f32 / 2.0;
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (height, position) in terrain_map.iter_with_pos_mut() {
         let distance = matrix_centre.distance_euclidian(position);
-        let normalised_distance = (distance / max_distance).min(1.0);
+        // let normalised_distance = (distance / max_distance).min(1.0);
 
         // assert!(normalised_distance >= 0.0 && normalised_distance <= 1.0);
 
-        let inverted_distance = 1.0 - normalised_distance;
+        // let inverted_distance = 1.0 - normalised_distance;
 
-        let noise_value = layered_noise(&noise_generator, position, 160.0, 8);
+        // let noise_value = layered_noise(&noise_generator, position, 160.0, 8);
 
-        *height = noise_value * inverted_distance;
+        // *height = noise_value * inverted_distance;
 
+        *height = layered_noise(&noise_generator, position, scale, layer_count)
+            * (1.0 - (distance / max_distance).min(1.0));
+
+        fn island_shape(x: u32, y: u32) -> f32 {
+            let rng = Rng::new();
+            let x_max_distance = x as f32 / rng.gen_range(1.0..3.0);
+            let y_max_distance = y as f32 / rng.gen_range(1.0..3.0);
+        }
         // assert!(!height.is_nan());
 
         // assert!(
@@ -124,4 +138,9 @@ fn layered_noise(
 
     // ((total_noise_value + 1.0) / 2.0) / total_amp
     ((total_noise_value / total_amp) + 1.0) / 2.0
+}
+
+fn island_shape(x_distance: f32, y_distance: f32, size: u32) -> f32 {
+    let x_max_distance = x_distance / rng;
+    let y_max_distance = y_distance / 2.0;
 }
