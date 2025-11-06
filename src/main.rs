@@ -33,7 +33,7 @@ fn main() {
         // assert!(normalised_distance >= 0.0 && normalised_distance <= 1.0);
 
         let noise_value = layered_noise(&noise_generator, position, scale, layer_count);
-        let inverted_distance = island_gradient(position, grid_size, max_distance);
+        let inverted_distance = island_gradient(position, grid_size, max_distance, 1.0, 1.0);
 
         *height = noise_value * inverted_distance;
 
@@ -99,9 +99,18 @@ fn get_colour(height: f32) -> Rgb<u8> {
     }
 }
 
-fn island_gradient(pos: UVec2, grid_size: UVec2, max_distance: f32) -> f32 {
+fn island_gradient(
+    pos: UVec2,
+    grid_size: UVec2,
+    max_distance: f32,
+    x_scale: f32,
+    y_scale: f32,
+) -> f32 {
+    let mut pos_f = pos.as_vec2();
+    pos_f.x *= x_scale;
+    pos_f.y *= y_scale;
     let grid_centre = grid_size / 2;
-    let distance = grid_centre.distance_euclidian(pos);
+    let distance = grid_centre.as_vec2().distance(pos_f);
     let normalised_distance = (distance / max_distance).min(1.0);
     let inverted_distance = 1.0 - normalised_distance;
 
