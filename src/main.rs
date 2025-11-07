@@ -4,12 +4,18 @@ use rng::*;
 use spatial2d::*;
 
 fn main() {
-    let size = 1000;
+    //creating a variable for the Rng crate
+    let rng = Rng::new();
+
+    let image_size = 2000;
     let scale: f32 = 160.0;
     let layer_count: u32 = 8;
+    let island_circumference = rng.gen_range(400..1000) as f32;
+    let island_centre_x = rng.gen_range(500..1500);
+    let island_centre_y = rng.gen_range(500..1500);
 
-    //setting the size of the y and x axis
-    let grid_size = UVec2::splat(size);
+    //setting the image_size of the y and x axis
+    let grid_size = UVec2::splat(image_size);
 
     //creating a matrix based on x and y variable sizes
     let mut terrain_map: Matrix<f32> = Matrix::new(grid_size);
@@ -17,27 +23,30 @@ fn main() {
     //creating a an image buffer based on the x and y variable sizes
     let mut image_buffer = RgbImage::new(grid_size.x, grid_size.y);
 
-    //creating a variable for the Rng crate
-    let rng = Rng::new();
-
     //creating a variable to generate a random for the noise generator
     let random_seed: i64 = rng.gen_value();
 
     //creating a random noise generator variable to be used in the loop
     let noise_generator = OpenSimplexNoise::new(Some(random_seed));
 
-    let max_distance = size as f32 / 2.0;
-
     //looping through the matrix and assigning noise values to each value in the matrix
     for (height, position) in terrain_map.iter_with_pos_mut() {
-        // assert!(normalised_distance >= 0.0 && normalised_distance <= 1.0);
+        // assert!(normalised_radius >= 0.0 && normalised_radius <= 1.0);
 
         let noise_value = layered_noise(&noise_generator, position, scale, layer_count);
-        let inverted_distance = island_gradient(position, grid_size, max_distance, 1.0, 1.0);
+        let inverted_radius = island_gradient(
+            position,
+            island_circumference,
+            1.0,
+            1.0,
+            island_centre_x,
+            island_centre_y,
+            1,
+        );
 
-        *height = noise_value * inverted_distance;
+        *height = noise_value * inverted_radius;
 
-        // *height = (1.0 - (distance / max_distance).min(1.0));
+        // *height = (1.0 - (island_radius / max_distance).min(1.0));
 
         // assert!(!height.is_nan());
 
@@ -46,15 +55,15 @@ fn main() {
         //     "height: {}, pos: {}, inv_dist: {}",
         //     *height,
         //     position,
-        //     inverted_distance
+        //     inverted_radius
         // );
 
         // if position == UVec2::new(0, 0) {
-        //     dbg!(inverted_distance, square_root, &height);
+        //     dbg!(inverted_radius, square_root, &height);
         // }
 
         // if position == UVec2::new(500, 500) {
-        //     dbg!(inverted_distance, square_root, &height);
+        //     dbg!(inverted_radius, square_root, &height);
         //     panic!()
         // }
     }
@@ -76,24 +85,30 @@ fn main() {
         .unwrap_or_else(|e| panic!("Failed to save image at {path:#?}: {e}"));
 
     // println!(
-    // "max distance {} \n centre point {}",
+    // "max island_radius {} \n centre point {}",
     // max_distance, matrix_centre
     // );
 }
 
 fn get_colour(height: f32) -> Rgb<u8> {
-    if height <= 0.2 {
-        Rgb([0, 0, 255]) // Water
-    } else if height <= 0.22 {
-        Rgb([190, 190, 0]) // Sand
-    } else if height <= 0.3 {
-        Rgb([230, 230, 0]) // 
-    } else if height <= 0.5 {
-        Rgb([0, 160, 0]) // 
+    if height <= 0.1 {
+        // water
+        Rgb([0, 0, 255])
+    } else if height <= 0.15 {
+        // dark sand
+        Rgb([190, 190, 0])
+    } else if height <= 0.2 {
+        // light sand
+        Rgb([230, 230, 0])
+    } else if height <= 0.38 {
+        // grass
+        Rgb([0, 160, 0])
     } else if height <= 0.8 {
-        Rgb([150, 75, 0]) // 
+        // mountains
+        Rgb([150, 75, 0])
     } else if height <= 0.9 {
-        Rgb([255, 255, 255]) // 
+        // snow
+        Rgb([255, 255, 255])
     } else {
         panic!()
     }
@@ -101,20 +116,32 @@ fn get_colour(height: f32) -> Rgb<u8> {
 
 fn island_gradient(
     pos: UVec2,
-    grid_size: UVec2,
-    max_distance: f32,
+    // grid_size: UVec2,
+    island_circumference: f32,
     x_scale: f32,
     y_scale: f32,
+    island_centre_x: u32,
+    island_centre_y: u32,
+    island_count: u32,
 ) -> f32 {
-    let mut pos_f = pos.as_vec2();
-    pos_f.x *= x_scale;
-    pos_f.y *= y_scale;
-    let grid_centre = grid_size / 2;
-    let distance = grid_centre.as_vec2().distance(pos_f);
-    let normalised_distance = (distance / max_distance).min(1.0);
-    let inverted_distance = 1.0 - normalised_distance;
+    let mut total_inverted_radius: f32 = 0.0;
+    // let mut amp = 1.0;
+    // let mut total_amp = 0.0;
 
-    return inverted_distance;
+    for _ in 0..island_count {
+        let mut pos_f = pos.as_vec2();
+        pos_f.x *= x_scale;
+        pos_f.y *= y_scale;
+        let island_centre = UVec2::new(island_centre_x, island_centre_y);
+        let island_radius = island_centre.as_vec2().distance(pos_f);
+        let normalised_radius = (island_radius / island_circumference).min(1.0);
+        total_inverted_radius = 1.0 - normalised_radius;
+
+        // total_amp += amp;
+        // amp /= 2.0;
+    }
+
+    total_inverted_radius
 }
 
 fn layered_noise(
