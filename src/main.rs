@@ -31,12 +31,7 @@ fn main() {
         // assert!(normalised_radius >= 0.0 && normalised_radius <= 1.0);
 
         let noise_value = layered_noise(&noise_generator, position, scale, layer_count);
-        let inverted_radius = island_gradient(
-            position,
-            island_circumference,
-            island_centre_x,
-            island_centre_y,
-        );
+        let inverted_radius = island_gradient(position, island_circumference, island_generator(3));
 
         *height = noise_value * inverted_radius;
 
@@ -108,19 +103,26 @@ fn get_colour(height: f32) -> Rgb<u8> {
     }
 }
 
-fn island_generator(island_count: u32) -> UVec2 {
-    for _ in 0..island_count {}
+fn island_generator(pos: UVec2, island_count: u32) -> Vec<UVec2> {
+    let mut island_gen: Vec<UVec2> = Vec::new();
+    let mut island_radius_gen: Vec<f32> = Vec::new();
+
+    for _ in 0..island_count {
+        let rng = Rng::new();
+        let island_centres = UVec2::new(rng.gen_range(200..1800), rng.gen_range(200..1800));
+        let island_radiuses = island_centres.distance_euclidian(pos);
+        island_radius_gen.push(island_radiuses);
+        island_gen.push(island_centres);
+    }
+
+    return island_gen;
+    return island_radius_gen;
 }
 
-fn island_gradient(
-    pos: UVec2,
-    island_circumference: f32,
-    island_centre_x: u32,
-    island_centre_y: u32,
-) -> f32 {
+fn island_gradient(pos: UVec2, island_circumference: f32, island_centres: Vec<UVec2>) -> f32 {
     let mut inverted_radius: f32 = 0.0;
-    let island_centre = UVec2::new(island_centre_x, island_centre_y);
-    let island_radius = island_centre.distance_euclidian(pos);
+    let island_centre = island_centres;
+    let island_radius = island_centre.distance(pos);
     let normalised_radius = (island_radius / island_circumference).min(1.0);
     inverted_radius += 1.0 - normalised_radius;
 
