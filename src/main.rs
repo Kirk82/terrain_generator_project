@@ -7,6 +7,7 @@ fn main() {
     let size = 1000;
     let scale: f32 = 160.0;
     let layer_count: u32 = 8;
+    let island_count: u32 = 3;
 
     //setting the size of the y and x axis
     let grid_size = UVec2::splat(size);
@@ -33,7 +34,8 @@ fn main() {
         // assert!(normalised_distance >= 0.0 && normalised_distance <= 1.0);
 
         let noise_value = layered_noise(&noise_generator, position, scale, layer_count);
-        let inverted_distance = island_gradient(position, grid_size, max_distance);
+        let inverted_distance =
+            island_gradient(position, get_island_centres(island_count), max_distance);
 
         *height = noise_value * inverted_distance;
 
@@ -99,25 +101,34 @@ fn get_colour(height: f32) -> Rgb<u8> {
     }
 }
 
-fn island_gradient(pos: UVec2, grid_size: UVec2, max_distance: f32) -> f32 {
-    let grid_centre = grid_size / 2;
-    let distance = grid_centre.distance_euclidian(pos);
-    let normalised_distance = (distance / max_distance).min(1.0);
-    let inverted_distance = 1.0 - normalised_distance;
+fn island_gradient(pos: UVec2, island_centres: Vec<UVec2>, max_distance: f32) -> f32 {
+    let mut inverted_distance = 0.0;
+    let mut distance: f32 = 0.0;
+    let mut normalised_distance: f32 = 0.0;
+
+    for centre in island_centres {
+        distance += centre.distance_euclidian(pos);
+        normalised_distance += (distance / max_distance).min(1.0);
+        inverted_distance += 1.0 - normalised_distance;
+    }
+    // let grid_centre = grid_size / 2;
+    // let distance = grid_centre.distance_euclidian(pos);
+    // let normalised_distance = (distance / max_distance).min(1.0);
+    // let inverted_distance = 1.0 - normalised_distance;
 
     return inverted_distance;
 }
 
-fn island_centres(island_count: u32) -> Vec<UVec2> {
-    let mut island_gen: Vec<UVec2> = Vec::new();
+fn get_island_centres(island_count: u32) -> Vec<UVec2> {
+    let mut island_centres: Vec<UVec2> = Vec::new();
     let rng = Rng::new();
 
     for _ in 0..island_count {
-        let island_centres = UVec2::new(rng.gen_range(200..800), rng.gen_range(200..800));
-        island_gen.push(island_centres);
+        let island_centre = UVec2::new(rng.gen_range(200..800), rng.gen_range(200..800));
+        island_centres.push(island_centre);
     }
 
-    return island_gen;
+    return island_centres;
 }
 
 fn layered_noise(
