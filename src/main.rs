@@ -102,21 +102,22 @@ fn get_colour(height: f32) -> Rgb<u8> {
 }
 
 fn island_gradient(pos: UVec2, island_centres: Vec<UVec2>, max_distance: f32) -> f32 {
-    let mut inverted_distance = 0.0;
-    let mut distance: f32 = 0.0;
-    let mut normalised_distance: f32 = 0.0;
+    let mut total_inverted_distance = 0.0;
+    let island_count: usize = island_centres.len();
 
     for centre in island_centres {
-        distance += centre.distance_euclidian(pos);
-        normalised_distance += (distance / max_distance).min(1.0);
-        inverted_distance += 1.0 - normalised_distance;
+        let distance = centre.distance_euclidian(pos);
+        let normalised_distance = (distance / max_distance).min(1.0);
+        let inverted_distance = 1.0 - normalised_distance;
+
+        total_inverted_distance += inverted_distance / island_count as f32;
     }
     // let grid_centre = grid_size / 2;
     // let distance = grid_centre.distance_euclidian(pos);
     // let normalised_distance = (distance / max_distance).min(1.0);
     // let inverted_distance = 1.0 - normalised_distance;
 
-    return inverted_distance;
+    return total_inverted_distance;
 }
 
 fn get_island_centres(island_count: u32) -> Vec<UVec2> {
