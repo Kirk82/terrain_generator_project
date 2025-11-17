@@ -4,10 +4,12 @@ use rng::*;
 use spatial2d::*;
 
 fn main() {
+    //creating a variable for the Rng crate
     let size = 1000;
     let scale: f32 = 160.0;
     let layer_count: u32 = 8;
     let island_count: u32 = 3;
+    let island_size = 500.0;
 
     //setting the size of the y and x axis
     let grid_size = UVec2::splat(size);
@@ -27,7 +29,9 @@ fn main() {
     //creating a random noise generator variable to be used in the loop
     let noise_generator = OpenSimplexNoise::new(Some(random_seed));
 
-    let max_distance = size as f32 / 2.0;
+    let max_distance: f32 = island_size;
+
+    let generated_island_centres = get_island_centres(island_count, grid_size);
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (height, position) in terrain_map.iter_with_pos_mut() {
@@ -35,7 +39,7 @@ fn main() {
 
         let noise_value = layered_noise(&noise_generator, position, scale, layer_count);
         let inverted_distance =
-            island_gradient(position, get_island_centres(island_count), max_distance);
+            island_gradient(position, generated_island_centres.clone(), max_distance);
 
         *height = noise_value * inverted_distance;
 
@@ -120,12 +124,12 @@ fn island_gradient(pos: UVec2, island_centres: Vec<UVec2>, max_distance: f32) ->
     return total_inverted_distance;
 }
 
-fn get_island_centres(island_count: u32) -> Vec<UVec2> {
+fn get_island_centres(island_count: u32, range_size: UVec2) -> Vec<UVec2> {
     let mut island_centres: Vec<UVec2> = Vec::new();
     let rng = Rng::new();
 
     for _ in 0..island_count {
-        let island_centre = UVec2::new(rng.gen_range(200..800), rng.gen_range(200..800));
+        let island_centre = UVec2::new(rng.gen_range(range_size.x), rng.gen_range(range_size.y));
         island_centres.push(island_centre);
     }
 
