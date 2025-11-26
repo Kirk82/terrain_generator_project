@@ -8,7 +8,7 @@ fn main() {
     let size = 1000;
     let scale: f32 = 160.0;
     let layer_count: u32 = 8;
-    let island_count: u32 = 3;
+    let island_count: u32 = 6;
     let island_size = 500.0;
 
     //setting the size of the y and x axis
@@ -31,7 +31,7 @@ fn main() {
 
     let max_distance: f32 = island_size;
 
-    let generated_island_centres = get_island_centres(island_count, grid_size);
+    let generated_island_centres = get_island_centres(island_count, size);
 
     //looping through the matrix and assigning noise values to each value in the matrix
     for (height, position) in terrain_map.iter_with_pos_mut() {
@@ -85,6 +85,7 @@ fn main() {
     // "max distance {} \n centre point {}",
     // max_distance, matrix_centre
     // );
+    println!("island centre {}", island_centre);
 }
 
 fn get_colour(height: f32) -> Rgb<u8> {
@@ -114,27 +115,31 @@ fn island_gradient(pos: UVec2, island_centres: Vec<UVec2>, max_distance: f32) ->
         let normalised_distance = (distance / max_distance).min(1.0);
         let inverted_distance = 1.0 - normalised_distance;
 
-        total_inverted_distance += inverted_distance / island_count as f32;
+        total_inverted_distance += inverted_distance;
     }
     // let grid_centre = grid_size / 2;
     // let distance = grid_centre.distance_euclidian(pos);
     // let normalised_distance = (distance / max_distance).min(1.0);
     // let inverted_distance = 1.0 - normalised_distance;
 
-    return total_inverted_distance;
+    return total_inverted_distance / island_count as f32;
 }
 
-fn get_island_centres(island_count: u32, range_size: UVec2) -> Vec<UVec2> {
+fn get_island_centres(island_count: u32, range_size: u32) -> Vec<UVec2> {
     let mut island_centres: Vec<UVec2> = Vec::new();
     let rng = Rng::new();
 
     for _ in 0..island_count {
-        let island_centre = UVec2::new(rng.gen_range(range_size.x), rng.gen_range(range_size.y));
+        let island_centre = UVec2::new(
+            rng.gen_range(range_size - 800..range_size - 200),
+            rng.gen_range(range_size - 800..range_size - 200),
+        );
         island_centres.push(island_centre);
     }
 
     return island_centres;
 }
+// println!("island centre {}", island_centre);
 
 fn layered_noise(
     noise_generator: &OpenSimplexNoise,
