@@ -85,7 +85,7 @@ fn main() {
     // "max distance {} \n centre point {}",
     // max_distance, matrix_centre
     // );
-    println!("island centre {}", island_centre);
+    // println!("island centre {}", island_centre);
 }
 
 fn get_colour(height: f32) -> Rgb<u8> {
@@ -128,11 +128,12 @@ fn island_gradient(pos: UVec2, island_centres: Vec<UVec2>, max_distance: f32) ->
 fn get_island_centres(island_count: u32, range_size: u32) -> Vec<UVec2> {
     let mut island_centres: Vec<UVec2> = Vec::new();
     let rng = Rng::new();
+    let range_border: u32 = 200;
 
     for _ in 0..island_count {
         let island_centre = UVec2::new(
-            rng.gen_range(range_size - 800..range_size - 200),
-            rng.gen_range(range_size - 800..range_size - 200),
+            rng.gen_range(range_border..range_size - range_border),
+            rng.gen_range(range_border..range_size - range_border),
         );
         island_centres.push(island_centre);
     }
